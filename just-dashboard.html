@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver Dashboard - Zaride</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard-style.css" />
+</head>
+<body class="dashboard-body">
+
+  <!-- Top Navigation Header -->
+  <header class="dash-header">
+    <div class="header-logo">Zaride <span class="badge-driver">Driver Portal</span></div>
+    <div class="header-profile">
+      <span id="driverNameDisplay">Driver Partner</span>
+      <button id="logoutBtn" class="logout-btn">Log Out</button>
+    </div>
+  </header>
+
+  <main class="dash-container">
+    
+    <!-- Status & Online Toggle Banner -->
+    <section class="status-banner">
+      <div class="status-info">
+        <h2>Your Driving Status</h2>
+        <p id="statusText" class="status-offline">Offline - Go online to receive ride requests</p>
+      </div>
+      <button id="toggleOnlineBtn" class="toggle-btn offline">Go Online</button>
+    </section>
+
+    <!-- Inspection & Verification Status Card -->
+    <div class="card inspection-card">
+      <div class="card-header">
+        <h3>Vehicle Inspection & Verification</h3>
+        <span class="status-pill pending">Pending Inspection</span>
+      </div>
+      <p class="card-desc">
+        Your email is verified. Physical vehicle inspection is required before full activation. Date, time, and inspection center details will be sent to your Gmail and via SMS.
+      </p>
+    </div>
+
+    <!-- Stats Overview Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Today's Earnings</span>
+        <h3 class="stat-value">₦0.00</h3>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Completed Trips</span>
+        <h3 class="stat-value">0</h3>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Driver Rating</span>
+        <h3 class="stat-value">New</h3>
+      </div>
+    </div>
+
+    <!-- Driver & Vehicle Details Summary -->
+    <div class="card details-card">
+      <h3>Registered Vehicle & Profile Info</h3>
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="label">Full Name</span>
+          <span class="val" id="infoName">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Phone Number</span>
+          <span class="val" id="infoPhone">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Vehicle Model</span>
+          <span class="val" id="infoCar">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Plate Number</span>
+          <span class="val" id="infoPlate">-</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="dashboard-script.js"></script>
+</body>
+</html>

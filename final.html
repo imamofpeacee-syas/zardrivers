@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Driver Dashboard · Zaria</title>
+<style>
+  :root{
+    --bg:#0b0f19;
+    --surface:#111726;
+    --surface-2:#182033;
+    --line:#232c44;
+    --text:#f2f5fb;
+    --muted:#8d97b3;
+    --accent:#c6f432;
+    --accent-ink:#0b0f19;
+    --good:#34d399;
+    --warn:#fbbf24;
+    --bad:#f87171;
+    --blue:#60a5fa;
+    --radius:18px;
+    --pad:16px;
+    --side:248px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg)}
+  body{
+    background:var(--bg);color:var(--text);min-height:100vh;
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:15px;line-height:1.4;
+  }
+  button{font-family:inherit}
+
+  /* ================= APP SHELL ================= */
+  .app{min-height:100vh}
+  .side{display:none}
+  .content{padding:var(--pad) var(--pad) 96px;max-width:1240px;margin:0 auto}
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ---------- Bottom nav (mobile / small tablet) ---------- */
+  .bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:rgba(11,15,25,.94);backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(4,1fr);
+    padding:8px 8px calc(10px + env(safe-area-inset-bottom));
+  }
+  .nav-btn{
+    background:none;border:none;color:var(--muted);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:11px;font-weight:600;padding:4px
+  }
+  .nav-btn svg{width:23px;height:23px}
+  .nav-btn.on{color:var(--accent)}
+
+  /* ---------- Sidebar (desktop) ---------- */
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;margin-bottom:28px;padding:0 6px}
+  .logo i{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-style:normal;font-size:16px}
+  .side .nav-btn{
+    flex-direction:row;gap:12px;font-size:14.5px;padding:12px 14px;border-radius:12px;
+    width:100%;justify-content:flex-start;margin-bottom:4px
+  }
+  .side .nav-btn:hover{background:var(--surface)}
+  .side .nav-btn.on{background:var(--surface-2)}
+  .side .area{
+    margin-top:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:12.5px;color:var(--muted)
+  }
+  .side .area b{display:block;color:var(--text);font-size:14px;margin-bottom:2px}
+
+  @media (min-width:900px){
+    :root{--pad:28px}
+    .app{display:grid;grid-template-columns:var(--side) 1fr}
+    .side{
+      display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+      padding:24px 16px;border-right:1px solid var(--line);background:var(--bg)
+    }
+    .bottom-nav{display:none}
+    .content{padding-bottom:40px;width:100%}
+  }
+
+  /* ================= SHARED ================= */
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px}
+  .page-title{font-size:clamp(22px,3vw,28px);font-weight:800}
+  .who{display:flex;align-items:center;gap:12px}
+  .avatar{
+    width:46px;height:46px;border-radius:50%;flex:none;
+    background:linear-gradient(135deg,var(--accent),#7be0a5);
+    display:grid;place-items:center;color:var(--accent-ink);font-weight:800;font-size:17px
+  }
+  .who small{display:block;color:var(--muted);font-size:12px}
+  .who b{font-size:16px}
+  .top-right{display:flex;align-items:center;gap:10px}
+  .loc-chip{
+    display:none;background:var(--surface);border:1px solid var(--line);border-radius:30px;
+    padding:9px 14px;font-size:13px;color:var(--muted)
+  }
+  .loc-chip b{color:var(--accent)}
+  @media(min-width:600px){.loc-chip{display:block}}
+  .icon-btn{
+    width:42px;height:42px;border-radius:50%;background:var(--surface);
+    border:1px solid var(--line);display:grid;place-items:center;position:relative;cursor:pointer;color:var(--text)
+  }
+  .icon-btn svg{width:20px;height:20px}
+  .dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid var(--surface)}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .sec-head{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 10px}
+  .sec-head h3{font-size:16px}
+  .sec-head a{color:var(--accent);font-size:13px;text-decoration:none;cursor:pointer}
+
+  .btn{
+    border:none;border-radius:13px;padding:13px 8px;font-size:14px;font-weight:700;cursor:pointer;
+    transition:transform .1s
+  }
+  .btn:active{transform:scale(.97)}
+  .btn.decline{background:var(--surface-2);color:var(--muted)}
+  .btn.counter{background:transparent;border:1.5px solid var(--accent);color:var(--accent)}
+  .btn.accept{background:var(--accent);color:var(--accent-ink)}
+  .btn.ghost{background:var(--surface-2);color:var(--text)}
+
+  /* ================= HOME LAYOUT ================= */
+  .home-grid{display:flex;flex-direction:column;gap:14px}
+  .col-a,.col-b{display:contents}
+  .o1{order:1}.o2{order:2}.o3{order:3}.o4{order:4}.o5{order:5}.o6{order:6}.o7{order:7}.o8{order:8}
+  .home-grid .sec-head{margin:10px 2px 0}
+  @media(min-width:900px){
+    .home-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+    .col-a,.col-b{display:flex;flex-direction:column;gap:14px}
+  }
+
+  /* ---------- Online toggle ---------- */
+  .status-card{display:flex;align-items:center;justify-content:space-between}
+  .status-card .state{display:flex;align-items:center;gap:10px}
+  .pulse{width:12px;height:12px;border-radius:50%;background:var(--muted);flex:none}
+  .status-card.online .pulse{background:var(--good);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}70%{box-shadow:0 0 0 10px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+  .status-card b{font-size:16px;display:block}
+  .status-card small{color:var(--muted);font-size:12px}
+  .switch{
+    width:64px;height:34px;border-radius:20px;background:var(--surface-2);border:1px solid var(--line);
+    position:relative;cursor:pointer;transition:.25s;flex:none
+  }
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:var(--muted);transition:.25s}
+  .status-card.online .switch{background:var(--accent);border-color:var(--accent)}
+  .status-card.online .switch::after{left:33px;background:var(--accent-ink)}
+
+  /* ---------- Hero ---------- */
+  .hero{background:linear-gradient(160deg,#1a2440 0%,#111726 70%)}
+  .hero .label{color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .hero .amount{font-size:clamp(34px,5vw,44px);font-weight:800;letter-spacing:-1px;margin:6px 0 2px}
+  .hero .amount span{font-size:.55em;color:var(--muted);font-weight:600;margin-right:3px}
+  .trend{color:var(--good);font-size:12.5px;font-weight:600}
+  .mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+  .mini{background:rgba(255,255,255,.04);border-radius:12px;padding:10px}
+  .mini small{color:var(--muted);font-size:11px;display:block}
+  .mini b{font-size:15px}
+
+  /* ---------- Quick grid ---------- */
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .q{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 4px;
+    text-align:center;font-size:11.5px;color:var(--muted);cursor:pointer
+  }
+  .q:hover{border-color:var(--accent)}
+  .q svg{width:22px;height:22px;display:block;margin:0 auto 6px;color:var(--accent)}
+
+  /* ---------- Ride requests ---------- */
+  #requests{display:grid;gap:12px}
+  @media(min-width:1280px){#requests{grid-template-columns:1fr}}
+  .req-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .pax{display:flex;gap:10px;align-items:center}
+  .pax .pa{width:38px;height:38px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+  .pax b{font-size:14px;display:block}
+  .pax small{color:var(--muted);font-size:12px}
+  .star{color:var(--warn)}
+  .offer{text-align:right;flex:none}
+  .offer small{color:var(--muted);font-size:11px;display:block}
+  .offer b{font-size:22px;color:var(--accent)}
+  .route{margin:14px 0 12px;position:relative;padding-left:22px}
+  .route::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .stop{position:relative;font-size:13.5px;margin-bottom:10px}
+  .stop:last-child{margin-bottom:0}
+  .stop::before{content:"";position:absolute;left:-22px;top:3px;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--surface)}
+  .stop.end::before{background:var(--accent)}
+  .stop small{display:block;color:var(--muted);font-size:11.5px}
+  .fair{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .fair b{color:var(--text)}
+  .actions{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:8px}
+  .counter-box{display:none;margin-bottom:10px;gap:8px;align-items:center}
+  .counter-box.show{display:flex}
+  .counter-box button{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-size:20px;cursor:pointer}
+  .counter-box .val{flex:1;text-align:center;font-size:22px;font-weight:800}
+  .offline-note{text-align:center;color:var(--muted);padding:34px 16px;background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);font-size:14px}
+  .offline-note b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+
+  /* ---------- Active trip ---------- */
+  .trip{background:linear-gradient(160deg,#16301f,#111726 70%);border-color:#28523a;display:none}
+  .trip.show{display:block}
+  .trip-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .badge{background:var(--good);color:#06281b;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px}
+  .trip-row{display:flex;gap:8px;margin-top:14px}
+  .trip-row .btn{flex:1}
+  .trip .route{margin-bottom:0}
+
+  /* ---------- Zones ---------- */
+  .zone{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px}
+  .zone:last-child{margin-bottom:0}
+  .zone .nm{width:96px;flex:none}
+  .bar{flex:1;height:8px;background:var(--surface-2);border-radius:8px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:8px}
+  .zone .mult{width:38px;text-align:right;font-weight:700}
+
+  /* ---------- Performance ---------- */
+  .perf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .ring{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center}
+  .ring svg{width:64px;height:64px;transform:rotate(-90deg)}
+  .ring circle{fill:none;stroke-width:7}
+  .ring .t{stroke:var(--surface-2)}
+  .ring .p{stroke:var(--accent);stroke-linecap:round}
+  .ring b{display:block;margin-top:-44px;margin-bottom:26px;font-size:14px}
+  .ring small{color:var(--muted);font-size:11.5px}
+
+  /* ---------- Bonus ---------- */
+  .bonus .row{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:10px;gap:8px}
+  .bonus .row span{color:var(--muted)}
+  .progress{height:10px;background:var(--surface-2);border-radius:10px;overflow:hidden}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7be0a5);border-radius:10px}
+
+  /* ================= EARNINGS ================= */
+  .two-col{display:grid;gap:14px;grid-template-columns:1fr}
+  @media(min-width:760px){.two-col{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}}
+  .stack{display:flex;flex-direction:column;gap:14px}
+  .seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px;max-width:420px}
+  .seg button{flex:1;background:none;border:none;color:var(--muted);padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--accent);color:var(--accent-ink)}
+  .bars{display:flex;align-items:flex-end;justify-content:space-between;height:150px;margin-top:14px;gap:4px}
+  .bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .bars i{width:60%;max-width:34px;background:var(--surface-2);border-radius:8px 8px 4px 4px;transition:height .6s}
+  .bars div.hl i{background:var(--accent)}
+  .bars span{font-size:11px;color:var(--muted)}
+  .list{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .li{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid var(--line);font-size:14px;gap:12px}
+  .li:last-child{border-bottom:none}
+  .li small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .li .r{text-align:right;font-weight:700;flex:none}
+  .neg{color:var(--bad)}.pos{color:var(--good)}
+  .pay-split{display:flex;height:12px;border-radius:12px;overflow:hidden;margin:12px 0 8px}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .legend b{color:var(--text)}
+  .withdraw{width:100%;padding:15px;background:var(--accent);color:var(--accent-ink);font-size:15px;border-radius:14px;margin-top:12px}
+
+  /* ================= TRIPS ================= */
+  .counts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;max-width:640px}
+  .count{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}
+  .count b{font-size:22px;display:block}
+  .count small{font-size:11.5px;color:var(--muted)}
+  .st{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block;margin-top:4px}
+  .st.done{background:rgba(52,211,153,.15);color:var(--good)}
+  .st.cancel{background:rgba(248,113,113,.15);color:var(--bad)}
+
+  /* ================= ACCOUNT ================= */
+  .profile{text-align:center;margin-bottom:10px}
+  .profile .avatar{width:78px;height:78px;font-size:28px;margin:0 auto 10px}
+  .profile h2{font-size:20px}
+  .profile p{color:var(--muted);font-size:13px;margin-top:2px}
+  .verified{display:inline-flex;gap:6px;align-items:center;margin-top:10px;background:rgba(52,211,153,.12);color:var(--good);font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px}
+  .doc{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid var(--line);font-size:14px;gap:12px}
+  .doc:last-child{border-bottom:none}
+  .doc small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .chip.ok{background:rgba(52,211,153,.15);color:var(--good)}
+  .chip.soon{background:rgba(251,191,36,.15);color:var(--warn)}
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid var(--line);font-size:14px;gap:12px;cursor:default}
+  .toggle-row:last-child{border-bottom:none}
+  .sw-sm{width:46px;height:26px;border-radius:20px;background:var(--surface-2);border:1px solid var(--line);position:relative;cursor:pointer;transition:.2s;flex:none}
+  .sw-sm::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:.2s}
+  .sw-sm.on{background:var(--accent);border-color:var(--accent)}
+  .sw-sm.on::after{left:22px;background:var(--accent-ink)}
+  .sos{width:100%;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--bad);padding:15px;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;margin-top:12px}
+
+  /* ================= TOAST ================= */
+  .toast{
+    position:fixed;left:50%;top:16px;transform:translate(-50%,-100px);
+    background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:13px;
+    padding:11px 18px;border-radius:30px;transition:.35s;z-index:50;max-width:90vw;text-align:center
+  }
+  .toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR (desktop) ============ -->
+  <aside class="side" id="sideNav">
+    <div class="logo"><i>D</i> Driver Hub</div>
+    <button class="nav-btn on" data-s="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+    <button class="nav-btn" data-s="earnings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>Earnings</button>
+    <button class="nav-btn" data-s="trips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14l-1.5-6h-11z"/><circle cx="8" cy="17.5" r="1.5"/><circle cx="16" cy="17.5" r="1.5"/><path d="M7 11l1.5-4h7L17 11"/></svg>Trips</button>
+    <button class="nav-btn" data-s="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</button>
+    <div class="area"><b>Service area</b>Zaria, Kaduna State. Rides are limited to Zaria only.</div>
+  </aside>
+
+  <main class="content">
+
+    <!-- ===================== HOME ===================== -->
+    <section class="screen active" id="home">
+      <div class="top">
+        <div class="who">
+          <div class="avatar">MI</div>
+          <div><small id="greet">Good morning</small><b>Musa Ibrahim</b></div>
+        </div>
+        <div class="top-right">
+          <div class="loc-chip">📍 <b>Zaria</b>, Kaduna State</div>
+          <div class="icon-btn" onclick="toast('2 new notifications')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span class="dot"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-grid">
+        <div class="col-a">
+          <div class="card status-card o1" id="statusCard">
+            <div class="state">
+              <div class="pulse"></div>
+              <div><b id="stateTitle">You're offline</b><small id="stateSub">Go online to receive requests</small></div>
+            </div>
+            <div class="switch" onclick="toggleOnline()"></div>
+          </div>
+
+          <div class="card trip o3" id="activeTrip">
+            <div class="trip-head"><b>Trip in progress</b><span class="badge">EN ROUTE</span></div>
+            <div class="route">
+              <div class="stop">PZ Junction, Samaru<small>Pickup · Aisha Y.</small></div>
+              <div class="stop end">Sabon Gari Market<small>Drop-off · 4.6 km · 12 min</small></div>
+            </div>
+            <div class="trip-row">
+              <button class="btn ghost" onclick="toast('Calling passenger (masked)…')">Call</button>
+              <button class="btn ghost" onclick="toast('Opening chat…')">Chat</button>
+              <button class="btn accept" onclick="finishTrip()">Complete</button>
+            </div>
+          </div>
+
+          <div class="sec-head o5"><h3>Ride requests</h3><a id="reqCount">—</a></div>
+          <div id="requests" class="o5"></div>
+        </div>
+
+        <div class="col-b">
+          <div class="card hero o2">
+            <div class="label"><span>Today's earnings</span><span id="hoursOnline">0h 00m online</span></div>
+            <div class="amount"><span>₦</span><em id="earnToday" style="font-style:normal">14,850</em></div>
+            <div class="trend">▲ 12% vs yesterday</div>
+            <div class="mini-stats">
+              <div class="mini"><small>Trips</small><b id="tripCount">7</b></div>
+              <div class="mini"><small>Per hour</small><b>₦2,120</b></div>
+              <div class="mini"><small>Tips</small><b>₦900</b></div>
+            </div>
+          </div>
+
+          <div class="grid4 o4">
+            <div class="q" onclick="go('earnings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="3"/><path d="M2 11h20"/></svg>Wallet</div>
+            <div class="q" onclick="go('trips')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>History</div>
+            <div class="q" onclick="toast('Opening referrals…')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/></svg>Rewards</div>
+            <div class="q" onclick="toast('Connecting to support…')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>Help</div>
+          </div>
+
+          <div class="sec-head o6"><h3>High-demand zones in Zaria</h3><a onclick="toast('Opening map…')">View map</a></div>
+          <div class="card o6">
+            <div class="zone"><span class="nm">Sabon Gari</span><div class="bar"><i style="width:92%;background:var(--bad)"></i></div><span class="mult">1.8x</span></div>
+            <div class="zone"><span class="nm">Samaru</span><div class="bar"><i style="width:76%;background:var(--warn)"></i></div><span class="mult">1.5x</span></div>
+            <div class="zone"><span class="nm">Tudun Wada</span><div class="bar"><i style="width:54%;background:var(--accent)"></i></div><span class="mult">1.2x</span></div>
+            <div class="zone"><span class="nm">Zaria City</span><div class="bar"><i style="width:40%;background:var(--accent)"></i></div><span class="mult">1.1x</span></div>
+            <div class="zone"><span class="nm">Kongo</span><div class="bar"><i style="width:26%;background:var(--blue)"></i></div><span class="mult">1.0x</span></div>
+          </div>
+
+          <div class="sec-head o7"><h3>Performance</h3><a onclick="toast('Opening reviews…')">Reviews</a></div>
+          <div class="perf o7">
+            <div class="ring"><svg viewBox="0 0 64 64"><circle class="t" cx="32" cy="32" r="26"/><circle class="p" cx="32" cy="32" r="26" stroke-dasharray="163.4" stroke-dashoffset="8"/></svg><b>4.95</b><small>Rating</small></div>
+            <div class="ring"><svg viewBox="0 0 64 64"><circle class="t" cx="32" cy="32" r="26"/><circle class="p" cx="32" cy="32" r="26" stroke-dasharray="163.4" stroke-dashoffset="26"/></svg><b>84%</b><small>Acceptance</small></div>
+            <div class="ring"><svg viewBox="0 0 64 64"><circle class="t" cx="32" cy="32" r="26"/><circle class="p" cx="32" cy="32" r="26" stroke-dasharray="163.4" stroke-dashoffset="13"/></svg><b>92%</b><small>Completion</small></div>
+          </div>
+
+          <div class="sec-head o8"><h3>Weekly bonus</h3><a>Details</a></div>
+          <div class="card bonus o8">
+            <div class="row"><b>Complete 40 trips</b><span>₦15,000 bonus</span></div>
+            <div class="progress"><i style="width:72%"></i></div>
+            <div class="row" style="margin:10px 0 0"><span>29 / 40 trips</span><span>3 days left</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== EARNINGS ===================== -->
+    <section class="screen" id="earnings">
+      <div class="top"><div class="page-title">Earnings</div></div>
+      <div class="seg" id="seg">
+        <button class="on" data-k="week">Week</button>
+        <button data-k="day">Day</button>
+        <button data-k="month">Month</button>
+      </div>
+
+      <div class="two-col">
+        <div class="stack">
+          <div class="card">
+            <div style="color:var(--muted);font-size:13px" id="chartLabel">This week</div>
+            <div style="font-size:30px;font-weight:800;margin-top:4px" id="chartTotal">₦78,300</div>
+            <div class="bars" id="bars"></div>
+          </div>
+          <div class="card">
+            <b style="font-size:14px">Payment split</b>
+            <div class="pay-split"><i style="width:58%;background:var(--accent)"></i><i style="width:42%;background:var(--blue)"></i></div>
+            <div class="legend"><span>● Cash <b>58%</b></span><span style="color:var(--blue)">● <span style="color:var(--muted)">Card / transfer</span> <b style="color:var(--text)">42%</b></span></div>
+          </div>
+          <div>
+            <div class="sec-head" style="margin-top:6px"><h3>Breakdown</h3></div>
+            <div class="list">
+              <div class="li"><span>Trip fares</span><span class="r">₦86,400</span></div>
+              <div class="li"><span>Tips</span><span class="r pos">+₦4,800</span></div>
+              <div class="li"><span>Bonuses</span><span class="r pos">+₦5,000</span></div>
+              <div class="li"><span>Platform fee</span><span class="r neg">−₦17,900</span></div>
+              <div class="li"><b>Net earnings</b><span class="r" style="color:var(--accent)">₦78,300</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="sec-head" style="margin-top:0"><h3>Wallet</h3></div>
+          <div class="list">
+            <div class="li"><div>Available balance<small>Ready to withdraw</small></div><span class="r">₦36,400</span></div>
+            <div class="li"><div>Pending<small>Transfers clearing</small></div><span class="r" style="color:var(--warn)">₦7,200</span></div>
+          </div>
+          <button class="btn withdraw" style="margin-top:0" onclick="toast('Withdrawal requested')">Withdraw to bank</button>
+
+          <div class="sec-head"><h3>Payout history</h3></div>
+          <div class="list">
+            <div class="li"><div>Zenith Bank ••4821<small>Oct 3 · Completed</small></div><span class="r">₦48,000</span></div>
+            <div class="li"><div>Zenith Bank ••4821<small>Sep 26 · Completed</small></div><span class="r">₦41,500</span></div>
+            <div class="li"><div>Zenith Bank ••4821<small>Sep 19 · Completed</small></div><span class="r">₦44,200</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TRIPS ===================== -->
+    <section class="screen" id="trips">
+      <div class="top"><div class="page-title">Trip history</div></div>
+      <div class="counts">
+        <div class="count"><b style="color:var(--good)">142</b><small>Completed</small></div>
+        <div class="count"><b style="color:var(--bad)">9</b><small>Cancelled</small></div>
+        <div class="count"><b style="color:var(--warn)">17</b><small>Missed</small></div>
+      </div>
+      <div class="list">
+        <div class="li"><div>Samaru Market → ABU Main Gate<small>Today · 08:12 · Cash</small></div><div class="r">₦1,500<br><span class="st done">Done</span></div></div>
+        <div class="li"><div>Sabon Gari Market → Tudun Wada<small>Today · 07:30 · Transfer</small></div><div class="r">₦1,800<br><span class="st done">Done</span></div></div>
+        <div class="li"><div>Zaria City (Kofar Doka) → Kongo<small>Yesterday · 18:40 · Cash</small></div><div class="r">₦2,200<br><span class="st cancel">Cancelled</span></div></div>
+        <div class="li"><div>Hanwa → Samaru Gate<small>Yesterday · 16:05 · Cash</small></div><div class="r">₦1,300<br><span class="st done">Done</span></div></div>
+        <div class="li"><div>Tudun Wada → Zaria City<small>Oct 6 · 14:22 · Transfer</small></div><div class="r">₦2,000<br><span class="st done">Done</span></div></div>
+        <div class="li"><div>Shika → Samaru Market<small>Oct 6 · 11:10 · Cash</small></div><div class="r">₦2,800<br><span class="st done">Done</span></div></div>
+      </div>
+    </section>
+
+    <!-- ===================== ACCOUNT ===================== -->
+    <section class="screen" id="account">
+      <div class="profile">
+        <div class="avatar">MI</div>
+        <h2>Musa Ibrahim</h2>
+        <p>Toyota Corolla · Silver · Zaria, Kaduna State</p>
+        <span class="verified">✓ Verified driver</span>
+      </div>
+
+      <div class="two-col">
+        <div class="stack">
+          <div class="sec-head" style="margin-top:6px"><h3>Documents</h3></div>
+          <div class="list">
+            <div class="doc"><div>Driver's licence<small>Expires Mar 2028</small></div><span class="chip ok">Valid</span></div>
+            <div class="doc"><div>Vehicle registration<small>Expires Nov 2026</small></div><span class="chip soon">Expiring soon</span></div>
+            <div class="doc"><div>Insurance<small>Expires Aug 2027</small></div><span class="chip ok">Valid</span></div>
+            <div class="doc"><div>Background check<small>Cleared Jan 2026</small></div><span class="chip ok">Approved</span></div>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="sec-head" style="margin-top:6px"><h3>Preferences</h3></div>
+          <div class="list">
+            <div class="toggle-row"><span>Sound alerts</span><div class="sw-sm on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><span>Auto-accept nearby rides</span><div class="sw-sm" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><span>Share trip with contacts</span><div class="sw-sm on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><span>Navigation</span><span style="color:var(--muted)">Google Maps ›</span></div>
+            <div class="toggle-row"><span>Language</span><span style="color:var(--muted)">English ›</span></div>
+          </div>
+
+          <div class="sec-head"><h3>Safety &amp; support</h3></div>
+          <div class="list">
+            <div class="toggle-row" style="cursor:pointer" onclick="toast('Opening emergency contacts…')"><span>Emergency contacts</span><span style="color:var(--muted)">›</span></div>
+            <div class="toggle-row" style="cursor:pointer" onclick="toast('Opening dispute centre…')"><span>Report an issue / dispute</span><span style="color:var(--muted)">›</span></div>
+            <div class="toggle-row" style="cursor:pointer" onclick="toast('Connecting to support…')"><span>Live support chat</span><span style="color:var(--muted)">›</span></div>
+          </div>
+          <button class="sos" onclick="toast('SOS alert sent to emergency contacts')">🚨 SOS · Emergency</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ BOTTOM NAV (mobile / tablet) ============ -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-btn on" data-s="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+  <button class="nav-btn" data-s="earnings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>Earnings</button>
+  <button class="nav-btn" data-s="trips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14l-1.5-6h-11z"/><circle cx="8" cy="17.5" r="1.5"/><circle cx="16" cy="17.5" r="1.5"/><path d="M7 11l1.5-4h7L17 11"/></svg>Trips</button>
+  <button class="nav-btn" data-s="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Account</button>
+</nav>
+
+<script>
+/* ---------- Greeting ---------- */
+(function(){
+  const h = new Date().getHours();
+  document.getElementById('greet').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+})();
+
+/* ---------- Navigation (sidebar + bottom nav share one handler) ---------- */
+const navBtns = document.querySelectorAll('.nav-btn');
+function go(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  navBtns.forEach(b => b.classList.toggle('on', b.dataset.s === id));
+  window.scrollTo({top:0});
+}
+navBtns.forEach(b => b.addEventListener('click', () => go(b.dataset.s)));
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------- Online / offline ---------- */
+let online = false, seconds = 0, timer;
+const fmt = s => Math.floor(s/3600) + 'h ' + String(Math.floor(s%3600/60)).padStart(2,'0') + 'm online';
+function toggleOnline(){
+  online = !online;
+  document.getElementById('statusCard').classList.toggle('online', online);
+  document.getElementById('stateTitle').textContent = online ? "You're online" : "You're offline";
+  document.getElementById('stateSub').textContent = online ? 'Looking for ride requests in Zaria…' : 'Go online to receive requests';
+  if(online){ timer = setInterval(() => { seconds += 60; document.getElementById('hoursOnline').textContent = fmt(seconds); }, 1000); }
+  else clearInterval(timer);
+  renderRequests();
+  toast(online ? 'You are online' : 'You are offline');
+}
+
+/* ---------- Ride requests (all within Zaria) ---------- */
+const rides = [
+  { id:1, name:'Aisha Y.',  rating:4.9, offer:1500, fair:1700, from:'Samaru Market',        fromSub:'0.8 km away · 3 min', to:'ABU Main Gate',       toSub:'3.2 km · 9 min',  pay:'Cash' },
+  { id:2, name:'Sani M.',   rating:4.7, offer:2000, fair:1900, from:'Sabon Gari Market',    fromSub:'1.2 km away · 4 min', to:'Tudun Wada',          toSub:'4.8 km · 13 min', pay:'Transfer' },
+  { id:3, name:'Fatima B.', rating:5.0, offer:1300, fair:1400, from:'Hanwa',                fromSub:'1.9 km away · 6 min', to:'Kongo Roundabout',    toSub:'3.6 km · 10 min', pay:'Cash' },
+  { id:4, name:'Yusuf D.',  rating:4.8, offer:2800, fair:3000, from:'Zaria City (Kofar Doka)', fromSub:'2.4 km away · 8 min', to:'Shika',            toSub:'11.5 km · 24 min',pay:'Cash' }
+];
+let counters = {};
+function renderRequests(){
+  const box = document.getElementById('requests');
+  document.getElementById('reqCount').textContent = online ? rides.length + ' nearby' : '—';
+  if(!online){
+    box.innerHTML = '<div class="offline-note"><b>You\'re offline</b>Turn on availability to see passengers and their offers.</div>';
+    return;
+  }
+  if(!rides.length){
+    box.innerHTML = '<div class="offline-note"><b>No requests right now</b>Stay online, new offers in Zaria will appear here.</div>';
+    return;
+  }
+  box.innerHTML = rides.map(r => {
+    const cur = counters[r.id] ?? r.offer;
+    return `
+    <div class="card req">
+      <div class="req-top">
+        <div class="pax">
+          <div class="pa">${r.name[0]}</div>
+          <div><b>${r.name}</b><small><span class="star">★</span> ${r.rating} · ${r.pay}</small></div>
+        </div>
+        <div class="offer"><small>Passenger offers</small><b>₦${cur.toLocaleString()}</b></div>
+      </div>
+      <div class="route">
+        <div class="stop">${r.from}<small>${r.fromSub}</small></div>
+        <div class="stop end">${r.to}<small>${r.toSub}</small></div>
+      </div>
+      <div class="fair">Suggested fair price: <b>₦${r.fair.toLocaleString()}</b></div>
+      <div class="counter-box" id="cb${r.id}">
+        <button onclick="adj(${r.id},-100)">−</button>
+        <div class="val" id="cv${r.id}">₦${cur.toLocaleString()}</div>
+        <button onclick="adj(${r.id},100)">+</button>
+      </div>
+      <div class="actions">
+        <button class="btn decline" onclick="decline(${r.id})">Decline</button>
+        <button class="btn counter" onclick="counter(${r.id})" id="cbtn${r.id}">Counter</button>
+        <button class="btn accept" onclick="accept(${r.id})">Accept</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function counter(id){
+  const box = document.getElementById('cb'+id), btn = document.getElementById('cbtn'+id);
+  const open = box.classList.toggle('show');
+  if(open){ btn.textContent = 'Send'; }
+  else {
+    const price = counters[id] ?? rides.find(r => r.id===id).offer;
+    btn.textContent = 'Counter';
+    toast('Counter-offer ₦' + price.toLocaleString() + ' sent');
+  }
+}
+function adj(id, d){
+  const base = counters[id] ?? rides.find(r => r.id===id).offer;
+  counters[id] = Math.max(500, base + d);
+  document.getElementById('cv'+id).textContent = '₦' + counters[id].toLocaleString();
+}
+function decline(id){
+  const i = rides.findIndex(r => r.id===id); if(i>-1) rides.splice(i,1);
+  renderRequests(); toast('Request declined');
+}
+function accept(id){
+  if(document.getElementById('activeTrip').classList.contains('show')){ toast('Finish your current trip first'); return; }
+  const i = rides.findIndex(r => r.id===id); if(i>-1) rides.splice(i,1);
+  document.getElementById('activeTrip').classList.add('show');
+  renderRequests(); toast('Ride accepted. Head to pickup');
+}
+function finishTrip(){
+  document.getElementById('activeTrip').classList.remove('show');
+  const e = document.getElementById('earnToday');
+  e.textContent = (parseInt(e.textContent.replace(/,/g,'')) + 1800).toLocaleString();
+  const t = document.getElementById('tripCount'); t.textContent = +t.textContent + 1;
+  toast('Trip completed · +₦1,800');
+}
+renderRequests();
+
+/* ---------- Earnings chart ---------- */
+const data = {
+  day:   { label:'Today',      total:'₦14,850',  vals:[10,35,60,45,80,55,70], labs:['6a','8a','10a','12p','2p','4p','6p'], hl:4 },
+  week:  { label:'This week',  total:'₦78,300',  vals:[40,55,35,70,90,100,60], labs:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], hl:5 },
+  month: { label:'This month', total:'₦336,500', vals:[60,75,55,90], labs:['W1','W2','W3','W4'], hl:3 }
+};
+function drawChart(k){
+  const d = data[k];
+  document.getElementById('chartLabel').textContent = d.label;
+  document.getElementById('chartTotal').textContent = d.total;
+  document.getElementById('bars').innerHTML = d.vals.map((v,i) =>
+    `<div class="${i===d.hl?'hl':''}"><i style="height:${v}%"></i><span>${d.labs[i]}</span></div>`).join('');
+}
+document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#seg button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); drawChart(b.dataset.k);
+}));
+drawChart('week');
+</script>
+</body>
+</html>

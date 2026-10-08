@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver Verification & Inspection - Zaride</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="driversverify-style.css" />
+</head>
+<body class="modal-overlay-bg">
+
+  <div class="join-card screen active">
+    <!-- Close / Back Button -->
+    <a href="welcome.html" class="close-btn">&times;</a>
+
+    <div class="top-icon-wrap driver-theme">
+      <svg class="mail-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+      </svg>
+    </div>
+
+    <h1 class="join-title">Email Verification Pending</h1>
+    <p class="join-subtitle">
+      We've sent a verification code to <span id="userEmailDisplay" class="highlight-email">your Gmail inbox</span>. 
+    </p>
+
+    <!-- Inspection Notice Banner -->
+    <div class="inspection-notice-box">
+      <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 s1 .9 1 2v4c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
+      </svg>
+      <p>
+        <strong>Physical Inspection Required:</strong> Your final activation code will be sent to your Gmail after your vehicle has undergone physical inspection. The exact date, time, and inspection location will be communicated to you via SMS and email.
+      </p>
+    </div>
+
+    <form id="otpVerifyForm">
+      <div class="form-group">
+        <label>Enter 6-Digit Email OTP Code</label>
+        <div class="otp-inputs-container">
+          <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]*" required />
+          <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]*" required />
+          <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]*" required />
+          <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]*" required />
+          <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]*" required />
+          <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]*" required />
+        </div>
+      </div>
+
+      <!-- Timer & Resend Section -->
+      <div class="timer-row">
+        <span id="timerText">Resend code in <strong id="countdown">05:00</strong></span>
+        <button type="button" id="resendBtn" class="resend-link" disabled>Resend Code</button>
+      </div>
+
+      <form id="driverForm">
+  <!-- Your Full Name and License Number inputs here -->
+
+  <button type="submit" class="btn-continue driver-btn">
+    Verify & Continue
+  </button>
+
+    </form>
+  </div>
+
+  <script src="driversverify-script.js"></script>
+</body>
+</html>

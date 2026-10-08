@@ -1,0 +1,282 @@
+/* --- Global Styles & Reset --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #ffffff;
+  min-height: 100vh;
+  background-color: #02221b;
+  overflow-x: hidden;
+}
+
+/* --- Navigation Bar --- */
+.navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  padding: 1.25rem 3rem;
+  background: rgba(2, 34, 27, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.nav-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Brand Logo */
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-icon-wrapper {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #ffc107;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.nav-logo-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+/* Hamburger Menu Button (Hidden on Desktop) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 101;
+}
+
+.hamburger span {
+  width: 100%;
+  height: 2.5px;
+  background-color: #ffffff;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.2rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #d1e2dd;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* --- Hero Section --- */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem 3rem 1.5rem;
+  
+  background: 
+    linear-gradient(180deg, rgba(2, 34, 27, 0.82) 0%, rgba(2, 34, 27, 0.94) 100%),
+    url('https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+}
+
+.hero-content {
+  max-width: 650px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Center Logo Icon */
+.center-logo {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  flex-shrink: 0;
+}
+
+.hero-logo-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Typography Corrections */
+.hero-title {
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.2rem;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  width: 100%;
+  display: block;
+}
+
+.hero-subtitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
+  width: 100%;
+  display: block;
+}
+
+.hero-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #e0f2ed;
+  font-weight: 400;
+  margin-bottom: 2rem;
+  max-width: 520px;
+  width: 100%;
+}
+
+/* Buttons and CTA */
+.btn-primary {
+  display: inline-block;
+  width: 100%;
+  max-width: 320px;
+  padding: 0.9rem 1.5rem;
+  background-color: #ffc107;
+  color: #02221b;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 25px;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.25);
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary:hover {
+  background-color: #ffca28;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.35);
+}
+
+/* Account Links */
+.account-prompt {
+  font-size: 0.9rem;
+  color: #b0d4cb;
+  font-weight: 500;
+}
+
+.signin-link {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.signin-link:hover {
+  color: #ffc107;
+}
+
+/* --- Responsive Styles for Mobile Devices --- */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem 1.5rem;
+  }
+
+  /* Show Hamburger Menu */
+  .hamburger {
+    display: flex;
+  }
+
+  /* Hide nav links by default on mobile */
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: rgba(2, 34, 27, 0.98);
+    backdrop-filter: blur(12px);
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s ease, opacity 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Active state when toggled via JS */
+  .nav-links.active {
+    max-height: 250px;
+    opacity: 1;
+  }
+
+  /* Hamburger Animation to 'X' when active */
+  .hamburger.active span:nth-child(1) {
+    transform: translateY(8.5px) rotate(45deg);
+  }
+
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.active span:nth-child(3) {
+    transform: translateY(-8.5px) rotate(-45deg);
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+  }
+
+  .hero-description {
+    font-size: 0.95rem;
+  }
+}
